@@ -36,4 +36,4 @@ jobs:
           cd ~/git/customisable-discord-bot/DiscordBot
           git checkout main
           git pull
-          ./publish.sh
+          nohup ./publish.sh &
