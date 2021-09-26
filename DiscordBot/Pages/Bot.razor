@@ -1,0 +1,44 @@
+﻿@page "/bot"
+
+@using DiscordBot.Data
+@inject BotService DiscordBot
+
+<h1>Bot Service</h1>
+
+@if(!HasStarted()) {
+    <button class="btn btn-primary" @onclick="StartBot">
+        Start Service
+    </button>
+} else {
+    <button class="btn btn-danger" @onclick="DiscordBot.StopBot">
+        Stop Service
+    </button>
+}
+<div id="output-wrapper">
+    <div>
+        <div id="bot-log-output">@((MarkupString) DiscordBot.LogMessages)</div>
+    </div>
+</div>
+
+
+
+@code {
+
+    protected override async Task OnInitializedAsync() {
+        DiscordBot.LogUpdated += HandleLogUpdated;
+
+    }
+
+    public async void HandleLogUpdated() {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void StartBot() {
+        DiscordBot.MainAsync().ContinueWith(t => Console.WriteLine(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+    }
+
+    private bool HasStarted() {
+        return DiscordBot.HasStarted();
+    }
+}
+ 
