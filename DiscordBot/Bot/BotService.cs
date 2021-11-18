@@ -4,12 +4,14 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Bot.Commands;
 using Microsoft.Extensions.Configuration;
 
 namespace DiscordBot.Bot {
     public class BotService {
         private readonly IConfiguration _config;
-        private DiscordSocketClient _client;
+        private readonly ICommandHandler _commandHandler;
+        private readonly DiscordSocketClient _client;
         private bool _started;
         private string _logMessages;
         public event Action LogUpdated;
@@ -22,13 +24,14 @@ namespace DiscordBot.Bot {
             }
         }
 
-        public BotService(IConfiguration config) {
+        public BotService(IConfiguration config, ICommandHandler commandHandler, DiscordSocketClient client) {
             _config = config;
+            _commandHandler = commandHandler;
+            _client = client;
         }
 
         public async Task MainAsync() {
             _started = true;
-            _client = new DiscordSocketClient();
 
             _client.Log += Log;
 
@@ -45,6 +48,7 @@ namespace DiscordBot.Bot {
             await _client.LoginAsync(TokenType.Bot, token);
             WriteLog(new LogMessage(LogSeverity.Info, "", $"Starting bot.."));
             await _client.StartAsync();
+            await _commandHandler.InstallCommandsAsync();
 
             // Block this task until the program is closed.
             await Task.Delay(-1);
