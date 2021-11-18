@@ -31,6 +31,7 @@ namespace DiscordBot
             services.AddServerSideBlazor();
             services.AddSingleton<DiscordSocketClient>();
             services.AddSingleton<CommandService>();
+            services.AddSingleton<ICommandHandler, CommandHandler>();
             services.AddSingleton<BotService>();
         }
 
