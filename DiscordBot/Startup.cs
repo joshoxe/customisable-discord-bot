@@ -9,7 +9,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord.Commands;
+using Discord.WebSocket;
 using DiscordBot.Bot;
+using DiscordBot.Bot.Commands;
 
 namespace DiscordBot
 {
@@ -26,6 +29,8 @@ namespace DiscordBot
         public void ConfigureServices(IServiceCollection services) {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddSingleton<DiscordSocketClient>();
+            services.AddSingleton<CommandService>();
             services.AddSingleton<BotService>();
         }
 
