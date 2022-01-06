@@ -2,6 +2,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.Bot;
 using DiscordBot.Bot.Commands;
+using DiscordBot.Bot.Logging;
 using DiscordBot.Database.Models;
 using DiscordBot.Database.Repositories;
 using Microsoft.AspNetCore.Builder;
@@ -34,6 +35,7 @@ namespace DiscordBot
             services.AddSingleton<ICommandHandler, CommandHandler>();
             services.AddSingleton<BotService>();
             services.AddSingleton<IRepository, CommandResponseRepository>();
+            services.AddSingleton<ILogger, BotLogger>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
