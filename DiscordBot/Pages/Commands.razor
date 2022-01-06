@@ -1,0 +1,89 @@
+﻿@page "/commands"
+@using DiscordBot.Database.Repositories
+@using DiscordBot.Database.Models
+@using System.ComponentModel
+@using MongoDB.Driver
+@inject IRepository Repository
+
+<h1>Custom Response Commands</h1>
+
+<p>Enter a custom basic command here that will respond with the response text provided.</p>
+
+<div id="custom-command-box">
+    @foreach(var command in ExistingCommandResponses)
+    {
+        <label for="command-name">Command: !</label>
+        <input type="text" id="command-name" placeholder="@command.Command" disabled="disabled" />
+        <label for="command-response">Response:</label>
+        <input type="text" id="command-response" placeholder="@command.Response" disabled="disabled" />
+        <br/>
+
+    }
+    
+    @foreach (var newCommand in NewCommands)
+    {
+        <label for="command-name">Command: !</label>
+        <input type="text" id="command-name" @bind-value="@NewCommands.Last().Command"/>
+        <label for="command-response">Response:</label>
+        <input type="text" id="command-response" @bind-value="@NewCommands.Last().Response"/>
+        <button class="btn btn-success" @onclick="SaveNewCommand">
+            Save
+        </button>
+        <br/>
+    }
+    @if (_editingCommand)
+    {
+        <button class="btn btn-secondary" @onclick="NewCommandInputBox" disabled="disabled">
+            + New Command
+        </button>
+    }
+    else
+    {
+        <button class="btn btn-primary" @onclick="NewCommandInputBox">
+            + New Command
+        </button>
+    }
+
+</div>
+
+@code
+{
+    public List<CommandResponse> ExistingCommandResponses = new List<CommandResponse>();
+    public List<CommandResponse> NewCommands = new List<CommandResponse>();
+    private bool _editingCommand = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ResetCommandLists();
+    }
+
+    public async Task<List<CommandResponse>> GetExistingCommandsCommandResponses()
+    {
+        return await Repository.GetAll();
+    }
+
+    public void NewCommandInputBox()
+    {
+        NewCommands.Add(new CommandResponse());
+        _editingCommand = true;
+    }
+
+    public async Task SaveNewCommand()
+    {
+        foreach (var commandResponse in NewCommands)
+        {
+            await Repository.Add(commandResponse);
+        }
+
+        await ResetCommandLists();
+
+        _editingCommand = false;
+    }
+
+    private async Task ResetCommandLists()
+    {
+        NewCommands = new List<CommandResponse>();
+        ExistingCommandResponses = new List<CommandResponse>();
+        ExistingCommandResponses = await GetExistingCommandsCommandResponses();
+    }
+}
