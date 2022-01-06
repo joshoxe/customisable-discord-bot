@@ -1,6 +1,8 @@
 ﻿@page "/bot"
 @using DiscordBot.Bot
+@using DiscordBot.Bot.Logging
 @inject BotService DiscordBot
+@inject ILogger Logger
 
 <h1>Bot Service</h1>
 
@@ -15,7 +17,7 @@
 }
 <div id="output-wrapper">
     <div>
-        <div id="bot-log-output">@((MarkupString) DiscordBot.LogMessages)</div>
+        <div id="bot-log-output">@((MarkupString) Logger.LogMessages)</div>
     </div>
 </div>
 
@@ -24,7 +26,7 @@
 @code {
 
     protected override async Task OnInitializedAsync() {
-        DiscordBot.LogUpdated += HandleLogUpdated;
+        Logger.LogUpdated += HandleLogUpdated;
 
     }
 
