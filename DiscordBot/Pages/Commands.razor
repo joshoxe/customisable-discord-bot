@@ -72,6 +72,7 @@
     {
         foreach (var commandResponse in NewCommands)
         {
+            commandResponse.Id = Guid.NewGuid().ToString();
             await Repository.Add(commandResponse);
         }
 
