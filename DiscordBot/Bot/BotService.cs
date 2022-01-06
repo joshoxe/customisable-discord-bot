@@ -3,8 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.Commands.Builders;
 using Discord.WebSocket;
 using DiscordBot.Bot.Commands;
+using DiscordBot.Bot.Logging;
 using Microsoft.Extensions.Configuration;
 
 namespace DiscordBot.Bot {
@@ -12,22 +14,15 @@ namespace DiscordBot.Bot {
         private readonly IConfiguration _config;
         private readonly ICommandHandler _commandHandler;
         private readonly DiscordSocketClient _client;
+        private readonly ILogger _logger;
         private bool _started;
-        private string _logMessages;
-        public event Action LogUpdated;
+       
 
-        public string LogMessages {
-            get => _logMessages;
-            set {
-                _logMessages = value;
-                LogUpdated?.Invoke();
-            }
-        }
-
-        public BotService(IConfiguration config, ICommandHandler commandHandler, DiscordSocketClient client) {
+        public BotService(IConfiguration config, ICommandHandler commandHandler, DiscordSocketClient client, ILogger logger) {
             _config = config;
             _commandHandler = commandHandler;
             _client = client;
+            _logger = logger;
         }
 
         public async Task MainAsync() {
@@ -44,9 +39,9 @@ namespace DiscordBot.Bot {
             // var token = File.ReadAllText("token.txt");
             // var token = JsonConvert.DeserializeObject<AConfigurationClass>(File.ReadAllText("config.json")).Token;
 
-            WriteLog(new LogMessage(LogSeverity.Info, "", "Logging in.."));
+            _logger.Log(new LogMessage(LogSeverity.Info, "", "Logging in.."));
             await _client.LoginAsync(TokenType.Bot, token);
-            WriteLog(new LogMessage(LogSeverity.Info, "", $"Starting bot.."));
+            _logger.Log(new LogMessage(LogSeverity.Info, "", $"Starting bot.."));
             await _client.StartAsync();
             await _commandHandler.InstallCommandsAsync();
 
@@ -60,18 +55,8 @@ namespace DiscordBot.Bot {
         }
 
         private Task Log(LogMessage message) {
-            WriteLog(message);
+            _logger.Log(message);
             return Task.CompletedTask;
-        }
-
-        private void WriteLog(LogMessage message) {
-            Console.WriteLine(message.ToString());
-            if(message.Exception is CommandException cmdException) {
-                LogMessages += $"[Command/{message.Severity}] {cmdException.Command.Aliases.First()}"
-                               + $" failed to execute in {cmdException.Context.Channel}.<br />";
-                LogMessages += cmdException + "<br />";
-            } else
-                LogMessages += $"[General/{message.Severity}] {message}<br />";
         }
 
         public bool HasStarted() {
