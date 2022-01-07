@@ -34,7 +34,7 @@ namespace DiscordBot
             services.AddSingleton<CommandService>();
             services.AddSingleton<ICommandHandler, CommandHandler>();
             services.AddSingleton<BotService>();
-            services.AddSingleton<IRepository, CommandResponseRepository>();
+            services.AddSingleton<IRepository, CommandRepository>();
             services.AddSingleton<ILogger, BotLogger>();
         }
 
