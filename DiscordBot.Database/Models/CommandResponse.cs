@@ -1,13 +1,18 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using System.Threading.Tasks;
+using Discord.Commands;
 
 namespace DiscordBot.Database.Models
 {
-    public class CommandResponse
+    public class CommandResponse : IResponse
     {
-        [BsonId]
-        public string? Id { get; set; }
+        public string Id { get; set; }
         public string Command { get; set; }
+
+        public async Task ExecuteChanceCommand(ICommandContext ctx)
+        {
+            await ctx.Channel.SendMessageAsync(Response);
+        }
+
         public string Response { get; set; }
     }
 }

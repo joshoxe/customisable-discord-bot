@@ -1,0 +1,91 @@
+﻿@page "/randomcommands"
+@using DiscordBot.Database.Models
+@using DiscordBot.Database.Repositories
+@using Microsoft.Extensions.Options
+@using System.Linq
+@inject IOptions<CommandDatabaseSettings> Config
+@inject IRepository Repository
+
+<h1>Random Response Commands</h1>
+
+<p>Enter a command and a list of responses. The bot will pick one response at random when triggered.</p>
+
+<div id="custom-command-box">
+    @foreach(var command in ExistingCommandResponses)
+    {
+        <label for="command-name">Command: !</label>
+        <input type="text" id="command-name" placeholder="@command.Command" disabled="disabled" />
+        <label for="command-response">Responses:</label>
+        <textarea type="text" id="command-response" rows="5" placeholder="@command.Response" disabled="disabled"></textarea>
+        <br />
+    }
+
+    @foreach(var newCommand in NewCommands)
+    {
+        <label for="command-name">Command: !</label>
+        <input type="text" id="command-name" @bind-value="@NewCommands.Last().Command" />
+        <label for="command-response">Responses (each on a new line):</label>
+        <textarea type="text" id="command-response" rows="5" @oninput="(args) => { NewCommands.Last().Response = args.Value.ToString(); }"></textarea>
+        <button class="btn btn-success" @onclick="SaveNewCommand">
+            Save
+        </button>
+        <br />
+    }
+    @if(_editingCommand)
+    {
+        <button class="btn btn-secondary" @onclick="NewCommandInputBox" disabled="disabled">
+            + New Command
+        </button>
+    } else
+    {
+        <button class="btn btn-primary" @onclick="NewCommandInputBox">
+            + New Command
+        </button>
+    }
+
+</div>
+
+@code
+{
+    public List<RandomResponse> ExistingCommandResponses = new List<RandomResponse>();
+    public List<RandomResponse> NewCommands = new List<RandomResponse>();
+    private bool _editingCommand;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ResetCommandLists();
+    }
+
+    public async Task<List<RandomResponse>> GetExistingChanceResponses()
+    {
+        return await Repository.GetAll<RandomResponse>(Config.Value.RandomResponseCollectionName);
+    }
+
+    public void NewCommandInputBox()
+    {
+        NewCommands.Add(new RandomResponse());
+        _editingCommand = true;
+    }
+
+    public async Task SaveNewCommand()
+    {
+        foreach(var randomResponse in NewCommands)
+        {
+            randomResponse.Id = Guid.NewGuid().ToString();
+            randomResponse.Command = $"!{randomResponse.Command}";
+            randomResponse.Responses = randomResponse.Response.Split('\n').ToList();
+            await Repository.Add(randomResponse, Config.Value.RandomResponseCollectionName);
+        }
+
+        await ResetCommandLists();
+
+        _editingCommand = false;
+    }
+
+    private async Task ResetCommandLists()
+    {
+        NewCommands = new List<RandomResponse>();
+        ExistingCommandResponses = new List<RandomResponse>();
+        ExistingCommandResponses = await GetExistingChanceResponses();
+    }
+}
