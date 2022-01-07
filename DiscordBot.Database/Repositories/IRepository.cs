@@ -6,8 +6,8 @@ namespace DiscordBot.Database.Repositories
 {
     public interface IRepository
     {
-        Task<CommandResponse> GetById(string id);
-        Task<List<CommandResponse>> GetAll();
-        Task Add(CommandResponse commandResponse);
+        Task<CommandResponse> GetById<T>(string id, string collectionName);
+        Task<List<CommandResponse>> GetAll<T>(string collectionName);
+        Task Add<T>(CommandResponse commandResponse, string collectionName);
     }
 }
