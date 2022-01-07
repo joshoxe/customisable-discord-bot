@@ -25,7 +25,12 @@ namespace DiscordBot.Bot {
             _logger = logger;
         }
 
-        public async Task MainAsync() {
+        public async Task MainAsync()
+        {
+
+            if (_started || _client.ConnectionState == ConnectionState.Connecting || _client.ConnectionState == ConnectionState.Connected)
+                return;
+
             _started = true;
 
             _client.Log += Log;
