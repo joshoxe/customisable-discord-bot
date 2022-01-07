@@ -1,1 +1,105 @@
-﻿
+﻿@page "/chancecommands"
+@using DiscordBot.Database.Models
+@using DiscordBot.Database.Repositories
+@using Microsoft.Extensions.Options
+@using System.Linq
+@inject IOptions<CommandDatabaseSettings> Config
+@inject IRepository Repository
+
+<h1>Custom Chance Triggers</h1>
+
+<p>Enter a trigger and a response, along with a percentage chance (between 0 and 1) for the bot to respond.
+    </p>
+
+<div id="custom-command-box">
+    @foreach (var command in ExistingCommandResponses)
+    {
+        <label for="command-name">Trigger:</label>
+        <input type="text" id="command-name" placeholder="@command.Command" disabled="disabled"/>
+        <label for="command-response">Response:</label>
+        <input type="text" id="command-response" placeholder="@command.Response" disabled="disabled"/>
+        <label for="command-response">Chance (0-1):</label>
+        <input type="text" id="command-response" placeholder="@command.Chance" disabled="disabled"/>
+        <br/>
+    }
+
+    @foreach (var newCommand in NewCommands)
+    {
+        <label for="command-name">Trigger:</label>
+        <input type="text" id="command-name" @bind-value="@NewCommands.Last().Command"/>
+        <label for="command-response">Response:</label>
+        <input type="text" id="command-response" @bind-value="@NewCommands.Last().Response"/>
+        <label for="command-response">Chance (0-1):</label>
+        <input type="text" id="command-response" @bind-value="@NewCommands.Last().Chance">
+        <button class="btn btn-success" @onclick="SaveNewCommand">
+            Save
+        </button>
+        <br/>
+    }
+    @if (_editingCommand)
+    {
+        <button class="btn btn-secondary" @onclick="NewCommandInputBox" disabled="disabled">
+            + New Command
+        </button>
+    }
+    else
+    {
+        <button class="btn btn-primary" @onclick="NewCommandInputBox">
+            + New Command
+        </button>
+    }
+
+</div>
+
+@code
+{
+    public List<ChanceResponse> ExistingCommandResponses = new List<ChanceResponse>();
+    public List<ChanceResponse> NewCommands = new List<ChanceResponse>();
+    private bool _editingCommand;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ResetCommandLists();
+    }
+
+    public async Task<List<ChanceResponse>> GetExistingChanceResponses()
+    {
+        return await Repository.GetAll<ChanceResponse>(Config.Value.ChanceResponseCollectionName);
+    }
+
+    public void NewCommandInputBox()
+    {
+        NewCommands.Add(new ChanceResponse());
+        _editingCommand = true;
+    }
+
+    public async Task SaveNewCommand()
+    {
+        foreach (var chanceResponse in NewCommands)
+        {
+            if (chanceResponse.Chance > 1)
+            {
+                chanceResponse.Chance = 1;
+            }
+
+            if (chanceResponse.Chance < 0)
+            {
+                chanceResponse.Chance = 0;
+            }
+
+            chanceResponse.Id = Guid.NewGuid().ToString();
+            await Repository.Add(chanceResponse, Config.Value.ChanceResponseCollectionName);
+        }
+
+        await ResetCommandLists();
+
+        _editingCommand = false;
+    }
+
+    private async Task ResetCommandLists()
+    {
+        NewCommands = new List<ChanceResponse>();
+        ExistingCommandResponses = new List<ChanceResponse>();
+        ExistingCommandResponses = await GetExistingChanceResponses();
+    }
+}

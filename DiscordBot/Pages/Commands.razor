@@ -73,6 +73,7 @@
         foreach (var commandResponse in NewCommands)
         {
             commandResponse.Id = Guid.NewGuid().ToString();
+            commandResponse.Command = $"!{commandResponse.Command}";
             await Repository.Add<CommandResponse>(commandResponse, Config.Value.CommandResponseCollectionName);
         }
 

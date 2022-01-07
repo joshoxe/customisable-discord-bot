@@ -11,5 +11,7 @@ namespace DiscordBot.Database.Models
         public string ConnectionString { get; set; }
         public string DatabaseName { get; set; }
         public string CommandResponseCollectionName { get; set; }
+        public string ChanceResponseCollectionName { get; set; }
+        public string RandomResponseCollectionName { get; set; }
     }
 }
