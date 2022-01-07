@@ -6,7 +6,7 @@
 
 <h1>Bot Service</h1>
 
-@if(!HasStarted()) {
+@if(!HasStarted() && DiscordBot.) {
     <button class="btn btn-primary" @onclick="StartBot">
         Start Service
     </button>
@@ -35,7 +35,7 @@
     }
 
     private void StartBot() {
-        DiscordBot.MainAsync().ContinueWith(t => Console.WriteLine(t.Exception), TaskContinuationOptions.OnlyOnFaulted);
+        DiscordBot.MainAsync().ContinueWith(t => Console.WriteLine(t.Exception));
     }
 
     private bool HasStarted() {

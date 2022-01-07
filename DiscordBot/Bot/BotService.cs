@@ -65,7 +65,7 @@ namespace DiscordBot.Bot {
         }
 
         public bool HasStarted() {
-            return _started;
+            return _started && (_client.ConnectionState == ConnectionState.Connected || _client.ConnectionState == ConnectionState.Connecting || _client.ConnectionState == ConnectionState.Disconnecting);
         }
     }
 }
