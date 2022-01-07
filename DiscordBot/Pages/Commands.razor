@@ -1,8 +1,8 @@
 ﻿@page "/commands"
 @using DiscordBot.Database.Repositories
 @using DiscordBot.Database.Models
-@using System.ComponentModel
-@using MongoDB.Driver
+@using Microsoft.Extensions.Options
+@inject IOptions<CommandDatabaseSettings> Config
 @inject IRepository Repository
 
 <h1>Custom Response Commands</h1>
@@ -59,7 +59,7 @@
 
     public async Task<List<CommandResponse>> GetExistingCommandsCommandResponses()
     {
-        return await Repository.GetAll();
+        return await Repository.GetAll<CommandResponse>(Config.Value.CommandResponseCollectionName);
     }
 
     public void NewCommandInputBox()
@@ -73,7 +73,7 @@
         foreach (var commandResponse in NewCommands)
         {
             commandResponse.Id = Guid.NewGuid().ToString();
-            await Repository.Add(commandResponse);
+            await Repository.Add<CommandResponse>(commandResponse, Config.Value.CommandResponseCollectionName);
         }
 
         await ResetCommandLists();
