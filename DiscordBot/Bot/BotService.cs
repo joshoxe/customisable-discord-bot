@@ -54,8 +54,8 @@ namespace DiscordBot.Bot {
             await Task.Delay(-1);
         }
 
-        public void StopBot() {
-            _client.StopAsync();
+        public async Task StopBot() {
+            await _client.StopAsync();
             _started = false;
         }
 
