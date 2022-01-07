@@ -55,6 +55,7 @@ namespace DiscordBot.Bot {
         }
 
         public async Task StopBot() {
+            await _client.LogoutAsync();
             await _client.StopAsync();
             _started = false;
         }
