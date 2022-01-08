@@ -16,7 +16,9 @@ namespace DiscordBot.Bot {
         private readonly DiscordSocketClient _client;
         private readonly ILogger _logger;
         private bool _started;
-       
+        private Task _wait;
+        private bool _registered;
+
 
         public BotService(IConfiguration config, ICommandHandler commandHandler, DiscordSocketClient client, ILogger logger) {
             _config = config;
@@ -33,7 +35,6 @@ namespace DiscordBot.Bot {
 
             _started = true;
 
-            _client.Log += Log;
 
             //  You can assign your bot token to a string, and pass that in to connect.
             //  This is, however, insecure, particularly if you plan to have your code hosted in a public repository.
@@ -44,20 +45,30 @@ namespace DiscordBot.Bot {
             // var token = File.ReadAllText("token.txt");
             // var token = JsonConvert.DeserializeObject<AConfigurationClass>(File.ReadAllText("config.json")).Token;
 
-            _logger.Log(new LogMessage(LogSeverity.Info, "", "Logging in.."));
             await _client.LoginAsync(TokenType.Bot, token);
-            _logger.Log(new LogMessage(LogSeverity.Info, "", $"Starting bot.."));
             await _client.StartAsync();
-            await _commandHandler.InstallCommandsAsync();
 
             // Block this task until the program is closed.
-            await Task.Delay(-1);
+            _wait = Task.Run(async () =>
+            {
+                while (_started) await Task.Delay(1);
+            });
+        }
+
+        public async Task RegisterListeners()
+        {
+            if (_registered)
+                return;
+
+            _client.Log += Log;
+            await _commandHandler.InstallCommandsAsync();
+            _registered = true;
         }
 
         public async Task StopBot() {
+            _started = false;
             await _client.LogoutAsync();
             await _client.StopAsync();
-            _started = false;
         }
 
         private Task Log(LogMessage message) {
