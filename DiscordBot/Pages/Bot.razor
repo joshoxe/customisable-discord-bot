@@ -34,8 +34,9 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private void StartBot() {
+    private async Task StartBot() {
         DiscordBot.MainAsync().ContinueWith(t => Console.WriteLine(t.Exception));
+        await DiscordBot.RegisterListeners();
     }
 
     private bool HasStarted() {
